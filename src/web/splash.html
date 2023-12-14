@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bitte warten...</title>
+
+    <style>
+        *{
+            user-select: none;
+        }
+
+        html{
+            display: block;
+            width: 100%;
+            height: 100%;
+            background-color: #3b3b3b;
+        }
+
+        .imgDiv{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        body{
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        img{
+            width: 0vw;
+            height: auto;
+            animation-name: logoLoader;
+            animation-duration: 1s;
+            animation-direction: alternate;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+        }
+
+        @keyframes logoLoader{
+            0% {width: 15vw;height: 15vw;}
+            100% {width: 20vw;height: 20vw;}
+        }
+    </style>
+</head>
+<body>
+    <div class="imgDiv">
+        <img draggable="false" src="./assets/favicons/android-icon-192x192.png">
+    </div>
+</body>
+</html>

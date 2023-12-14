@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <title>WetterApp</title>
+
+    <script src="./assets/libraries/brython/brython.min.js"></script>
+    <script src="./assets/libraries/brython/brython_stdlib.min.js"></script>
+
+    <!-- Für Apple-Geräte -->
+    <link rel="apple-touch-icon" sizes="180x180" href="./assets/favicons/apple-touch-icon-180x180.png">
+    <!-- Für Browser -->
+    <link rel="shortcut icon" type="image/x-icon" href="./assets/favicons/favicon-32x32.ico">
+    <link rel="icon" type="image/png" sizes="96x96" href="./assets/favicons/favicon-96x96.png">
+    <!-- Für Windows Metro -->
+    <meta name="msapplication-square310x310logo" content="./assets/favicons/mstile-310x310.png">
+    <meta name="msapplication-TileColor" content="#FFFFFF">
+</head>
+<body onload="brython()" oncontextmenu="return false;" id="brython-body">
+    <section id="about" style="display: none;">
+        <div id="bg"></div>
+        <div id="about-div">
+            <button id="close-about">Schliessen</button>
+            <h1><b>WetterApp 1.3</b></h1>
+            <span>Dieses Programm wurde in Python geschrieben. Mithilfe der Python 3 Implementierung <a href="https://brython.info/index.html">brython</a> läuft es webbasiert. Es ist plattformübergreifend mithilfe von <a href="https://www.electronjs.org/">ElectronJS</a>.</span>
+            <h2><b>Autoren</b></h2>
+            <span>Wir, Oliver, David, Isha und Tim D., haben dieses Programm im Modul 122 an der gibb entwickelt.</span>
+            <h2><b>APIs</b></h2>
+            <ul>
+                <li><a href="https://openweathermap.org/api/geocoding-api">OpenWeather Geocoding API</a></li>
+                <li><a href="https://open-meteo.com/en">OpenMeteo Weather API</a></li>
+            </ul>
+        </div>
+    </section>
+    <header id="statusbar">
+        <img onclick="location.reload();" id="prev-ico" src="./assets/appicons/logo.svg" draggable="false" style="z-index: 1;">
+        <a id="showinf">WetterApp</a>
+        <span id="time">Zeit</span>
+    </header>
+    <main id="content">
+        <div id="header-div">
+            <div class="mb-1 flex align-i-center row">
+                <select name="weather-time" id="weather-time">
+                    <option value="-1" selected>Jetzt</option>
+                    <option value="0">0 Uhr</option>
+                    <option value="1">1 Uhr</option>
+                    <option value="2">2 Uhr</option>
+                    <option value="3">3 Uhr</option>
+                    <option value="4">4 Uhr</option>
+                    <option value="5">5 Uhr</option>
+                    <option value="6">6 Uhr</option>
+                    <option value="7">7 Uhr</option>
+                    <option value="8">8 Uhr</option>
+                    <option value="9">9 Uhr</option>
+                    <option value="10">10 Uhr</option>
+                    <option value="11">11 Uhr</option>
+                    <option value="12">12 Uhr</option>
+                    <option value="13">13 Uhr</option>
+                    <option value="14">14 Uhr</option>
+                    <option value="15">15 Uhr</option>
+                    <option value="16">16 Uhr</option>
+                    <option value="17">17 Uhr</option>
+                    <option value="18">18 Uhr</option>
+                    <option value="19">19 Uhr</option>
+                    <option value="20">20 Uhr</option>
+                    <option value="21">21 Uhr</option>
+                    <option value="22">22 Uhr</option>
+                    <option value="23">23 Uhr</option>
+                </select>
+                <input id="city" name="city" type="text" placeholder="Stadt eingeben (z.B. Bern)" list="cities"><datalist id="cities"></datalist>
+                <button id="send-city">Suchen</button>
+            </div>
+            <big><b>Wetter für <span id="weather-place">...</span> um <span id="weather-show-time">...</span> Uhr</b></big>
+        </div>
+        <section id="scroll-window">
+        <div id="main-div">
+            <div id="weather-code-div" class="flex flex-d-column width-max">
+                <img id="big-ico" class="align-s-center" src="./assets/appicons/logo.svg" draggable="false" style="z-index: 1;">
+                <span id="weather-code" class="align-s-center">...</span>
+            </div>
+            <div id="show-hour-div" class="width-max" style="display: flex; flex-direction: column;">
+                <b>Diese Stunde</b>
+                <span class="show-hour-element">
+                    <span>Temperatur: </span>
+                    <span id="sh-temperature">...</span>
+                    <span> °C</span>
+                </span>
+                <span class="show-hour-element">
+                    <span id="gibbE">Gefühlte Temperatur: </span>
+                    <span id="sh-apparent-temperature">...</span>
+                    <span> °C</span>
+                </span>
+                <span class="show-hour-element">
+                    <span>Windrichtung: </span>
+                    <span id="sh-winddirection">...</span>
+                    <span> °</span>
+                </span>
+                <span class="show-hour-element">
+                    <span>Windgeschwindigkeit: </span>
+                    <span id="sh-windspeed">...</span>
+                    <span> km/h</span>
+                </span>
+            </div>
+            <div id="sunrise-div" class="flex flex-d-column width-min">
+                <img id="sunrise" class="align-s-center" src="./assets/appicons/sunrise.svg" draggable="false" style="z-index: 1;">
+                <span class="show-day-element align-s-center""> 
+                    <span id="sd-sunrise">...</span>
+                </span>
+            </div>
+            <div id="show-day-div" class="width-max" style="display: flex; flex-direction: column;">
+                <b>Dieser Tag</b>
+                <span class="show-day-element">
+                    <span>Min. Temperatur: </span>
+                    <span id="sd-min-temperature">...</span>
+                    <span> °C</span>
+                </span>
+                <span class="show-hour-element">
+                    <span>Max. Temperatur: </span>
+                    <span id="sd-max-temperature">...</span>
+                    <span> °C</span>
+                </span>
+            </div>
+            <div id="sunset-div" class="flex flex-d-column width-min">
+                <img id="sunset" class="align-s-center" src="./assets/appicons/sunset.svg" draggable="false" style="z-index: 1;">
+                <span class="show-day-element align-s-center"> 
+                <span id="sd-sunset">...</span>
+            </div>
+        </div>
+        </section>
+    </main>
+    <script type="text/python">
+        #Import required libraries
+        import browser, urllib, json, time;
+        from browser import document, bind, html, timer;
+        from browser.html import *;
+        from browser.widgets.dialog import InfoDialog;
+        from urllib import parse, request;
+        from datetime import datetime;
+
+        #HTML-Elements 
+
+        #Data from cities
+        cityDataList = document["cities"];
+        cityInput = document["city"]; 
+        sendBtn = document["send-city"];
+
+        #Data from place
+        placeTitle = document["weather-place"];
+
+        #Data  from Time 
+        weatherTime = document["weather-time"];
+
+        
+        weatherCodeText = document["weather-code"];
+
+        #Weather code for icons
+        weatherCodeIcon = document["big-ico"];
+
+        #Data for the elements of the app: temperature, wind etc.
+        temperature = document["sh-temperature"]; 
+        apparent_temperature = document["sh-apparent-temperature"]; 
+        winddirection = document["sh-winddirection"]; 
+        windspeed = document["sh-windspeed"];
+        min_temp = document["sd-min-temperature"];
+        max_temp = document["sd-max-temperature"]; 
+
+        #Data for sunrise and sunset
+        sunrise = document["sd-sunrise"];
+        sunset = document["sd-sunset"];
+        
+        #The about section
+        about = document["about"];
+        #Easter Egg 
+        gibbE = document["gibbE"];
+        weatherShowTime = document["weather-show-time"];
+        
+        #Boolean if gibb mode is activated
+        is_gibb = False;
+        
+        #List of weatherstates for the icons that it changes apperently
+        weatherStates = {
+            0:"Klarer Himmel",
+            1:"Überwiegend klar",
+            2:"Teilweise bewölkt",
+            3:"Bedeckt",
+            45:"Nebel",
+            48:"Reifnebel",
+            51:"Leichter Nieselregen",
+            53:"Mässiger Nieselregen",
+            55:"Dichter Nieselregen",
+            56:"Leichter eisiger Nieselregen",
+            57:"Dichter eisiger Nieselregen",
+            61:"Leichter Regen",
+            63:"Mässiger Regen",
+            65:"Starker Regen",
+            66:"Leichter Eisregen",
+            67:"Starker Eisregen",
+            71:"Leichter Schneefall",
+            73:"Mässiger Schneefall",
+            75:"Starker Schneefall",
+            77:"Schneekörner",
+            80:"Leichte Regenschauer",
+            81:"Mässige Regenschauer",
+            82:"Heftige Regenschauer",
+            85:"Leichte Schneeschauer",
+            86:"Starke Schneeschauer",
+            95:"Gewitter",
+            96:"Gewitter mit leichtem Hagel", 
+            99:"Gewitter mit starkem Hagel"
+        };
+
+        #Functions
+
+        #Gets the information from the API that has information from the geography
+        def getGeo(val, limit=1):
+            geourl = f'https://api.openweathermap.org/geo/1.0/direct?q={urllib.parse.quote(val)}&limit={limit}&appid=f6712b1c7840209d07751af1ae5ed0e3';
+            geosocket = urllib.request.urlopen(geourl);
+            georaw = geosocket.read();
+            geojson = json.loads(georaw);
+
+            print(f'Opening geosocket on host with origin {geourl}');
+            print(f'Response:');
+            print(geojson);
+            
+            return geojson;
+        
+        #Gets the information from the API that has information of the state of the weather
+        def getWeatherState(lat, lon):
+            weatherurl = f'https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,relativehumidity_2m,apparent_temperature,weathercode,windspeed_10m,winddirection_10m&daily=temperature_2m_max,temperature_2m_min,sunrise,sunset&timezone=Europe%2FBerlin&timeformat=unixtime';
+            weathersocket = urllib.request.urlopen(weatherurl);
+            weatherjson = json.loads(weathersocket.read());
+
+            print(f'Opening weathersocket on host with origin {weatherurl}');
+            print(f'Response:');
+            print(weatherjson);
+
+            return(weatherjson);
+         
+        #Gets information of the weather in the city
+        def getWeather(e="false"):
+            global is_gibb;
+            if (cityInput.value == ""):
+                return;
+            if (cityInput.value == "gibb mode"):
+                print("Gibb mode activated!");
+                InfoDialog("WetterApp", "Der gibb-Modus wurde aktiviert!");
+                is_gibb = True;
+                return;
+            geojson = getGeo(cityInput.value, 1)[0];
+            cityInput.value = f"{geojson['name']}, {geojson['state']}, {geojson['country']}";
+            weather = getWeatherState(geojson["lat"], geojson["lon"]);
+            loadWeather(weather);
+         
+        #Shows the about page
+        def showInf(e="false"):
+            about.style = {
+                "display": "block"
+            };
+        
+        #Hides the information if you dont want the about page
+        def hideInf(e="false"):
+            about.style = {
+                "display": "none"
+            };
+        #Text completion when the user writes his destination
+        def geoPrev(val="", limit=5):
+            if (val==""):
+                val = cityInput.value;
+            if (cityInput.value == ""):
+                return;
+            geojson = getGeo(val, limit);
+            cityDataList.clear();
+            for i in range(len(geojson)):
+                cityDataList <= html.OPTION(f"{geojson[i]['name']}, {geojson[i]['state']}, {geojson[i]['country']}");
+        
+        #Reads the input of the city that the user has written and gives the information of the weather
+        def cityInputEvt(e):
+            if (cityInput.value == ""):
+                    return;
+            try:
+                match e.key:
+                    case "Enter":
+                        getWeather();
+                        return;
+                    case _:
+                        timer.set_timeout(geoPrev, 500);
+                        return;
+            except:
+                timer.set_timeout(geoPrev, 500);
+        
+        #Loads the information to HTML that it displays correctly (all elements)
+        def loadWeather(w): 
+            global is_gibb;
+            placeTitle.textContent = cityInput.value;
+            if (int(weatherTime.value) == -1):
+                currHour = int(datetime.now().strftime("%H"));
+            else:
+                currHour = int(weatherTime.value);
+            #Apprend
+            weatherShowTime.textContent = currHour;
+            weatherNum = w["hourly"]["weathercode"][currHour];
+            weatherCodeText.textContent = weatherStates[weatherNum];
+            weatherCodeIcon.attrs['src'] = "./assets/stateicons/" + str(weatherNum) + ".svg";
+            temperature.textContent = w["hourly"]["temperature_2m"][currHour];
+            apparent_temperature.textContent = w["hourly"]["apparent_temperature"][currHour]; 
+            if (is_gibb == True):
+                gibbE.textContent = "Gefühlte gibb Temperatur: ";
+                apparent_temperature.textContent = int(w["hourly"]["apparent_temperature"][currHour]) * 1.25;
+            winddirection.textContent = w["hourly"]["winddirection_10m"][currHour]; 
+            windspeed.textContent = w["hourly"]["windspeed_10m"][currHour];
+            min_temp.textContent = w["daily"]["temperature_2m_min"][0]; 
+            max_temp.textContent = w["daily"]["temperature_2m_max"][0]; 
+            sunrise.textContent =  datetime.fromtimestamp(int(w["daily"]["sunrise"][0])).strftime('%H:%M');
+            sunset.textContent = datetime.fromtimestamp(int(w["daily"]["sunset"][0])).strftime('%H:%M');
+        
+        #Sends the data if clicked or with enter
+        sendBtn.bind("click", getWeather);
+        cityInput.bind("keydown", cityInputEvt);
+        document["showinf"].bind("click", showInf);
+        document["bg"].bind("click", hideInf);
+        document["close-about"].bind("click", hideInf);
+    </script>
+
+    <!-- Async time synchronization (applied to element on top right). It updates every five seconds -->
+    <script type="text/python">
+        from datetime import datetime;
+        from browser import document;
+        from browser import timer;
+        
+        #Has the information when its night or day
+        def bgColor(sTime):
+            sTime = int(sTime.strftime("%H"));
+            if sTime <= 8 or sTime >= 20:
+                body.attrs['id'] = "night";
+            else:
+                body.attrs['id'] = "day";
+
+        #Function for the time and a colormode if the time is at a certain point(night or day)
+        def loadTime():
+            currDateTime = datetime.now();
+            currTime = currDateTime.strftime("%H:%M");
+            timeE.textContent = currTime;
+            bgColor(currDateTime);
+            timer.set_timeout(loadTime, 5000);
+        body = document["brython-body"];
+        timeE = document["time"];
+        loadTime();
+    </script>
+</body>
+</html>
